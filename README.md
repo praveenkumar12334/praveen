@@ -130,7 +130,7 @@
         <div class="project">
             <h3>image compresser</h3>
             <p>Description of the project.</p>
-            <a href="file:///E:/pro1.html">View Project</a>
+            <a href="file:///D:/FSWD/portfolio.html">view project</a>
         </div>
         <div class="project">
             <h3>weather forecasting</h3>
