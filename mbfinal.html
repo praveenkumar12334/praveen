@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Microblogging App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+      color: #333;
+    }
+    header {
+      background-color: #4a90e2;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+      border-bottom: 5px solid #003a70;
+    }
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    #login-form, #user-dashboard, #register-form, #followers-section {
+      margin-bottom: 2rem;
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    #login-form h2, #user-dashboard h2, #register-form h2, #feed h2 {
+      margin-bottom: 1rem;
+      color: #4a90e2;
+    }
+    input, textarea, button {
+      margin: 0.5rem; 
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    input, textarea {
+      width: calc(100% - 1rem);
+    }
+    button {
+      background-color: #4a90e2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #357abd;
+    }
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    li {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      background: #f1f8ff;
+    }
+    li p {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Simple Microblogging App</h1>
+  </header>
+  <main>
+    <!-- Registration Form -->
+    <div id="register-form">
+      <h2>Register</h2>
+      <input type="text" id="register-username" placeholder="Choose a username">
+      <input type="password" id="register-password" placeholder="Choose a password">
+      <button id="register-btn">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <h2>Login</h2>
+      <input type="text" id="login-username" placeholder="Username">
+      <input type="password" id="login-password" placeholder="Password">
+      <button id="login-btn">Login</button>
+    </div>
+
+    <!-- User Dashboard -->
+    <div id="user-dashboard" style="display: none;">
+      <h2>Welcome, <span id="user-username"></span>!</h2>
+      <textarea id="post-content" placeholder="Write your post..."></textarea>
+      <button id="post-btn">Post</button>
+
+      <!-- Follow Section -->
+      <div id="followers-section">
+        <h2>Follow Users</h2>
+        <input type="text" id="follow-username" placeholder="Username to follow">
+        <button id="follow-btn">Follow</button>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div id="feed">
+      <h2>Feed</h2>
+      <ul id="post-list"></ul>
+    </div>
+  </main>
+  
+  <script>
+    const registerForm = document.getElementById('register-form');
+    const registerUsernameInput = document.getElementById('register-username');
+    const registerPasswordInput = document.getElementById('register-password');
+    const registerButton = document.getElementById('register-btn');
+
+    const loginForm = document.getElementById('login-form'); 
+    const loginUsernameInput = document.getElementById('login-username');
+    const loginPasswordInput = document.getElementById('login-password');
+    const loginButton = document.getElementById('login-btn');
+
+    const userDashboard = document.getElementById('user-dashboard');
+    const userUsername = document.getElementById('user-username'); 
+    const postContent = document.getElementById('post-content'); 
+    const postButton = document.getElementById('post-btn');
+
+    const followUsernameInput = document.getElementById('follow-username');
+    const followButton = document.getElementById('follow-btn');
+
+    const postList = document.getElementById('post-list');
+
+    let currentUser = null;
+
+    // Helper function to get current user data
+    function getCurrentUser() {
+      return JSON.parse(localStorage.getItem('currentUser')) || null;
+    }
+
+    // Helper function to set current user data
+    function setCurrentUser(user) {
+      localStorage.setItem('currentUser', JSON.stringify(user));
+    }
+
+    // Register new user
+    registerButton.addEventListener('click', () => {
+      const username = registerUsernameInput.value.trim();
+      const password = registerPasswordInput.value.trim();
+      if (username && password) {
+        let users = JSON.parse(localStorage.getItem('users')) || {};
+        if (!users[username]) {
+          users[username] = { password, posts: [], following: [] };
+          localStorage.setItem('users', JSON.stringify(users));
+          alert('Registration successful!');
+          registerUsernameInput.value = '';
+          registerPasswordInput.value = '';
+        } else {
+          alert('Username already exists.');
+        }
+      }
+    });
+
+    // Login user
+    loginButton.addEventListener('click', () => {
+      const username = loginUsernameInput.value.trim();
+      const password = loginPasswordInput.value.trim();
+      let users = JSON.parse(localStorage.getItem('users')) || {};
+      if (users[username] && users[username].password === password) {
+        currentUser = username;
+        setCurrentUser(currentUser);
+        loginForm.style.display = 'none';
+        userDashboard.style.display = 'block';
+        userUsername.textContent = username;
+        loadPosts();
+      } else {
+        alert('Invalid username or password.');
+      }
+    });
+
+    // Follow a user
+    followButton.addEventListener('click', () => {
+      const followUsername = followUsernameInput.value.trim();
+      let users = JSON.parse(localStorage.getItem('users')) || {};
+      if (currentUser && users[followUsername] && followUsername !== currentUser) {
+        if (!users[currentUser].following.includes(followUsername)) {
+          users[currentUser].following.push(followUsername);
+          localStorage.setItem('users', JSON.stringify(users));
+          followUsernameInput.value = '';
+        } else {
+          alert('Already following this user.');
+        }
+      } else {
+        alert('Invalid username or you cannot follow yourself.');
+      }
+    });
+
+    // Post content
+    postButton.addEventListener('click', () => {
+      const content = postContent.value.trim();
+      if (content) {
+        let users = JSON.parse(localStorage.getItem('users')) || {};
+        if (users[currentUser]) {
+          const post = {
+            username: currentUser,
+            content: content
+          };
+          users[currentUser].posts.push(post);
+          localStorage.setItem('users', JSON.stringify(users));
+          postContent.value = '';
+          loadPosts();
+        }
+      }
+    });
+
+    // Load posts
+    function loadPosts() {
+      postList.innerHTML = '';
+      let users = JSON.parse(localStorage.getItem('users')) || {};
+      if (currentUser) {
+        let following = users[currentUser].following;
+        following.push(currentUser); // Include own posts
+
+        following.forEach(user => {
+          if (users[user]) {
+            users[user].posts.forEach(post => {
+              const postItem = document.createElement('li');
+              postItem.innerHTML = `<p><strong>${post.username}</strong>: ${post.content}</p>`;
+              postList.appendChild(postItem);
+            });
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
