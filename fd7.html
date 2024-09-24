@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Delivery</title>
+    <style>
+        body {
+            background-color: rgb(245, 198, 129);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #325691;
+            color: rgb(235, 223, 223);
+            text-align: center;
+            padding: 10px;
+        }
+        .menu {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            padding: 25px;
+        }
+        .item {
+            border: 1px solid #fad49c;
+            padding: 10px;
+            margin: 10px;
+            text-align: center;
+            width: 200px;
+        }
+        .item img {
+            max-width: 100%;
+        }
+        .price {
+            font-weight: bold;
+        }
+        .add-to-cart {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .cart {
+            padding: 20px;
+            border-top: 2px solid #325691;
+        }
+        .order-confirmation {
+            display: none;
+            padding: 20px;
+            border-top: 2px solid #325691;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>𝓕𝓸𝓸𝓭𝓲𝓮 𝓔𝓶𝓹𝓲𝓻𝓮</h1>
+    </header>
+    <div class="menu">
+        <!-- Menu items as before -->
+        <div class="item">
+            <img src="burger.jpg" alt="Burger">
+            <h2>Burger</h2>
+            <p>Delicious burger with all the fixings.</p>
+            <span class="price">$12</span>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="item">
+            <img src="pizza.jpg" alt="Pizza">
+            <h2>Pizza</h2>
+            <p>Classic cheese pizza with tomato sauce.</p>
+            <span class="price">$10</span>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="item">
+            <img src="briyani.jpg" alt="Briyani">
+            <h2>Briyani</h2>
+            <p>Delicious Briyani with all the fixings.</p>
+            <span class="price">$8</span>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="item">
+            <img src="chappathi.jpg" alt="Chappathi">
+            <h2>Chappathi</h2>
+            <p>Delicious Chappathi with all the fixings.</p>
+            <span class="price">$0.5</span>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="item">
+            <img src="dosa.jpg" alt="Dosa">
+            <h2>Dosa</h2>
+            <p>Delicious Dosa with all the fixings.</p>
+            <span class="price">$6</span>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="item">
+            <img src="download.jpg" alt="South Indian food">
+            <h2>South Indian Food</h2>
+            <p>Delicious South Indian food with all the fixings.</p>
+            <span class="price">$10</span>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="item">
+            <img src="fullmeal.jpg" alt="Fullmeal">
+            <h2>Fullmeal</h2>
+            <p>Delicious Fullmeal with all the fixings.</p>
+            <span class="price">$12</span>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="item">
+            <img src="idly.jpg" alt="Idly">
+            <h2>Idly</h2>
+            <p>Delicious Idly with all the fixings.</p>
+            <span class="price">$5</span>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="item">
+            <img src="poori.jpg" alt="Poori">
+            <h2>Poori</h2>
+            <p>Delicious Poori with all the fixings.</p>
+            <span class="price">$0.5</span>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+    </div>
+    <div class="cart">
+        <h2 style="text-align: center;">Cart</h2>
+        <ul id="cart-items"></ul>
+        <h3 style="text-align: center;">Total: $<span id="cart-total">0.00</span></h3>
+        <button id="place-order" style="background-color: #325691; color: white; border: none; padding: 5px 10px; cursor: pointer;">Place Order</button>
+    </div>
+    <div class="order-confirmation" id="order-confirmation">
+        <h2>Order Confirmation</h2>
+        <p id="order-summary"></p>
+    </div>
+    <script>
+        const addToCartButtons = document.querySelectorAll('.add-to-cart'); 
+        const cartItemsList = document.getElementById('cart-items');
+        const cartTotal = document.getElementById('cart-total');
+        const placeOrderButton = document.getElementById('place-order');
+        const orderConfirmation = document.getElementById('order-confirmation');
+        const orderSummary = document.getElementById('order-summary');
+        let total = 0;
+        const cart = {};
+
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const item = button.parentElement;
+                const itemName = item.querySelector('h2').textContent;
+                const itemPrice = parseFloat(item.querySelector('.price').textContent.slice(1));
+
+                if (cart[itemName]) {
+                    cart[itemName] += 1;
+                } else {
+                    cart[itemName] = 1;
+                }
+                total += itemPrice;
+                updateCart();
+            });
+        });
+
+        function updateCart() {
+            cartItemsList.innerHTML = '';
+            for (const item in cart) {
+                const li = document.createElement('li');
+                li.textContent = `${item} x${cart[item]}`;
+                cartItemsList.appendChild(li);
+            }
+            cartTotal.textContent = total.toFixed(2);
+        }
+
+        placeOrderButton.addEventListener('click', () => {
+            if (total > 0) {
+                const orderDetails = [];
+                for (const item in cart) {
+                    orderDetails.push(`${item} x${cart[item]}`);
+                }
+                orderSummary.textContent = `Your order: ${orderDetails.join(', ')}. Total: $${total.toFixed(2)}`;
+                orderConfirmation.style.display = 'block';
+                document.querySelector('.cart').style.display = 'none';
+            } else {
+                alert('Your cart is empty!');
+            }
+        });
+    </script>
+</body>
+</html>
