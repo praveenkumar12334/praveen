@@ -43,7 +43,7 @@
             padding: 5px 10px;
             cursor: pointer;
         }
-        .cart {
+        .cart, .customer-info {
             padding: 20px;
             border-top: 2px solid #325691;
         }
@@ -51,16 +51,18 @@
             display: none;
             padding: 20px;
             border-top: 2px solid #325691;
-            text-align: center;
+            text-align: left;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>𝓕𝓸𝓸𝓭𝓲𝓮 𝓔𝓶𝓹𝓲𝓻𝓮</h1>
+        <h1>𝓕𝓸𝓸𝓸𝓭𝓲𝓮 𝓔𝓶𝓹𝓲𝓻𝓮</h1>
     </header>
     <div class="menu">
-        <!-- Menu items as before -->
         <div class="item">
             <img src="burger.jpg" alt="Burger">
             <h2>Burger</h2>
@@ -131,7 +133,26 @@
         <h3 style="text-align: center;">Total: ₹<span id="cart-total">0.00</span></h3>
         <button id="place-order" style="background-color: #325691; color: white; border: none; padding: 5px 10px; cursor: pointer;">Place Order</button>
     </div>
-    <div class="order-confirmation" id="order-confirmation">
+    <div class="customer-info hidden" id="customer-info">
+        <h2>Customer Information</h2>
+        <label for="customer-name">Name:</label>
+        <input type="text" id="customer-name" required>
+        <br>
+        <label for="customer-phone">Phone Number:</label>
+        <input type="text" id="customer-phone" required>
+        <br>
+        <label for="customer-address">Address:</label>
+        <input type="text" id="customer-address" required>
+        <br>
+        <label for="payment-method">Payment Method:</label>
+        <select id="payment-method">
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+        </select>
+        <br>
+        <button id="confirm-order" style="background-color: #325691; color: white; border: none; padding: 5px 10px; cursor: pointer;">Confirm Order</button>
+    </div>
+    <div class="order-confirmation hidden" id="order-confirmation">
         <h2>Order Confirmation</h2>
         <p id="order-summary"></p>
     </div>
@@ -140,10 +161,13 @@
         const cartItemsList = document.getElementById('cart-items');
         const cartTotal = document.getElementById('cart-total');
         const placeOrderButton = document.getElementById('place-order');
+        const customerInfoDiv = document.getElementById('customer-info');
+        const confirmOrderButton = document.getElementById('confirm-order');
         const orderConfirmation = document.getElementById('order-confirmation');
         const orderSummary = document.getElementById('order-summary');
         let total = 0;
         const cart = {};
+        const taxRate = 0.05; // 5% tax
 
         addToCartButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -173,15 +197,43 @@
 
         placeOrderButton.addEventListener('click', () => {
             if (total > 0) {
-                const orderDetails = [];
-                for (const item in cart) {
-                    orderDetails.push(`${item} x${cart[item]}`);
-                }
-                orderSummary.textContent = `Your order: ${orderDetails.join(', ')}. Total: ₹${total.toFixed(2)}`;
-                orderConfirmation.style.display = 'block';
+                customerInfoDiv.classList.remove('hidden');
                 document.querySelector('.cart').style.display = 'none';
             } else {
                 alert('Your cart is empty!');
+            }
+        });
+
+        confirmOrderButton.addEventListener('click', () => {
+            const customerName = document.getElementById('customer-name').value;
+            const customerPhone = document.getElementById('customer-phone').value;
+            const customerAddress = document.getElementById('customer-address').value;
+            const paymentMethod = document.getElementById('payment-method').value;
+
+            if (customerName && customerPhone && customerAddress) {
+                const orderDetails = [];
+                let subtotal = total;
+                let tax = subtotal * taxRate;
+                let totalAmount = subtotal + tax;
+
+                for (const item in cart) {
+                    orderDetails.push(`${item} x${cart[item]}`);
+                }
+
+                orderSummary.innerHTML = `
+                    <strong>Customer:</strong> ${customerName}<br>
+                    <strong>Phone:</strong> ${customerPhone}<br>
+                    <strong>Address:</strong> ${customerAddress}<br>
+                    <strong>Payment:</strong> ${paymentMethod}<br>
+                    <strong>Order:</strong><br> ${orderDetails.join('<br>')}
+                    <br><strong>Subtotal:</strong> ₹${subtotal.toFixed(2)}<br>
+                    <strong>Tax (5%):</strong> ₹${tax.toFixed(2)}<br>
+                    <strong>Total:</strong> ₹${totalAmount.toFixed(2)}
+                `;
+                orderConfirmation.style.display = 'block';
+                customerInfoDiv.classList.add('hidden');
+            } else {
+                alert('Please fill in all the fields!');
             }
         });
     </script>
