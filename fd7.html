@@ -177,7 +177,7 @@
                 for (const item in cart) {
                     orderDetails.push(`${item} x${cart[item]}`);
                 }
-                orderSummary.textContent = `Your order: ₹${orderDetails.join(', ')}. Total: ₹${total.toFixed(2)}`;
+                orderSummary.textContent = `Your order: ${orderDetails.join(', ')}. Total: ₹${total.toFixed(2)}`;
                 orderConfirmation.style.display = 'block';
                 document.querySelector('.cart').style.display = 'none';
             } else {
